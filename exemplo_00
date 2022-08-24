@@ -1,0 +1,37 @@
+# Carregando DataSet em Pandas DataFrame novamente para tratamente de outliers
+df_bank_full = pd.read_csv("bank-additional-full.csv", sep =";")
+
+
+# Convertendo para Dummies antes de aplicar get_dummies()
+df_bank_full['y'].replace({'no':0,'yes':1},inplace=True)
+
+
+# Aplicando get_dummies()
+df_bank_full_dummies = pd.get_dummies(df_bank_full)
+
+
+# Remoção dos outliers
+df_bank_full_dummies = df_bank_full_dummies.loc[(df_bank_full_dummies['age']<70)]
+df_bank_full_dummies = df_bank_full_dummies.loc[(df_bank_full_dummies['duration']<489)]
+df_bank_full_dummies = df_bank_full_dummies.loc[(df_bank_full_dummies['campaign']<4.0)]
+df_bank_full_dummies = df_bank_full_dummies.loc[(df_bank_full_dummies['pdays']<=10)]
+df_bank_full_dummies = df_bank_full_dummies.loc[(df_bank_full_dummies['previous']<4.0)]
+df_bank_full_dummies = df_bank_full_dummies.loc[(df_bank_full_dummies['cons.conf.idx']<-30)]
+df_bank_full_dummies = df_bank_full_dummies.loc[(df_bank_full_dummies['euribor3m']<=1.5)]
+df_bank_full_noutlires = df_bank_full_dummies
+# Identificar Outliers Notebook ""Projeto_Integrador_bank.ipynb""
+
+
+# Dividindo em Variaveis Preditoras e Varial target 
+x = df_bank_full_noutlires.drop(columns=['y'])
+y = df_bank_full_noutlires['y']
+
+
+# Dividindo o DataSet em Treino e Test
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=.2, random_state=123)
+
+
+# Aplicar o fit() e extrair o predict()
+modelo_grad = GradientBoostingClassifier(n_estimators=2000)
+modelo_grad = modelo_grad.fit(x_train, y_train)
+y_pred = modelo_grad.predict(x_test)
